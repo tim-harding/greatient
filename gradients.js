@@ -47,10 +47,11 @@ function init(vertexSource, fragmentSource) {
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
   const program = createProgram(gl, vertexShader, fragmentShader);
   const positionAttribute = gl.getAttribLocation(program, "a_position");
+  const resolutionUniform = gl.getUniformLocation(program, "u_resolution");
   const positionBuffer = gl.createBuffer();
   if (!positionBuffer) throw new glError(gl);
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  const positions = [0, 0, 0, 0.5, 0.7, 0];
+  const positions = [10, 20, 80, 20, 10, 30, 10, 30, 80, 20, 80, 30];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
   const vao = gl.createVertexArray();
   if (!vao) throw new glError(gl);
@@ -60,7 +61,8 @@ function init(vertexSource, fragmentSource) {
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.useProgram(program);
-  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.uniform2f(resolutionUniform, gl.canvas.width, gl.canvas.height);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 /**
