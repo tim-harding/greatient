@@ -37,12 +37,24 @@ function init(vertexSource, fragmentSource) {
   if (!(canvas instanceof HTMLCanvasElement)) {
     throw new Error("Expected a canvas element");
   }
-  const gl = canvas.getContext("webgl2");
+  const gl = canvas.getContext("webgl2", {
+    alpha: false,
+    premultipliedAlpha: true,
+    depth: true,
+    antialias: true,
+    preserveDrawingBuffer: true,
+    powerPreference: "low-power",
+  });
   if (!gl) {
     console.error("WebGL2 not available");
     return;
   }
+  if (window.matchMedia("(color-gamut: p3)").matches) {
+    gl.drawingBufferColorSpace = "display-p3";
+  }
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
   const program = createProgram(gl, vertexShader, fragmentShader);
@@ -59,7 +71,7 @@ function init(vertexSource, fragmentSource) {
   gl.enableVertexAttribArray(positionAttribute);
   gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
   gl.clearColor(0, 0, 0, 0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);
   gl.uniform2f(resolutionUniform, gl.canvas.width, gl.canvas.height);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
