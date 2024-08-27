@@ -61,12 +61,12 @@ function init(vertexSource, fragmentSource) {
   const positionAttribute = gl.getAttribLocation(program, "a_position");
   const resolutionUniform = gl.getUniformLocation(program, "u_resolution");
   const positionBuffer = gl.createBuffer();
-  if (!positionBuffer) throw new glError(gl);
+  if (!positionBuffer) throw glError(gl);
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   const positions = [10, 20, 80, 20, 10, 30, 10, 30, 80, 20, 80, 30];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
   const vao = gl.createVertexArray();
-  if (!vao) throw new glError(gl);
+  if (!vao) throw glError(gl);
   gl.bindVertexArray(vao);
   gl.enableVertexAttribArray(positionAttribute);
   gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
