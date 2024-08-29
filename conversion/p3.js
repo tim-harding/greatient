@@ -2,7 +2,7 @@ import {
   gammaToLinear as srgbGammaToLinear,
   linearToGamma as srgbLinearToGamma,
 } from "./srgb";
-import { Matrix } from "./matrix";
+import { Matrix } from "./linalg";
 
 /** Convert a P3 channel from gamma to linear */
 export const gammaToLinear = srgbGammaToLinear;

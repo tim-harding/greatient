@@ -1,4 +1,4 @@
-import { Matrix, Vector } from "./matrix";
+import { Matrix, Vector } from "./linalg";
 
 // prettier-ignore
 /** @type {Vector} */

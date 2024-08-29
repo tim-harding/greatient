@@ -1,5 +1,5 @@
 import { sign } from "./shared";
-import { Matrix } from "./matrix";
+import { Matrix } from "./linalg";
 
 const Et2 = 16 / 512;
 const Et = 1 / 512;

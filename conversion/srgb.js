@@ -1,4 +1,4 @@
-import { Matrix } from "./matrix";
+import { Matrix } from "./linalg";
 import { sign } from "./shared";
 
 /**

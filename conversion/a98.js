@@ -1,5 +1,5 @@
 import { sign } from "./shared";
-import { Matrix } from "./matrix";
+import { Matrix } from "./linalg";
 
 /**
  * Convert an a98 channel from gamma to linear

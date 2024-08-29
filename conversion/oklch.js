@@ -1,5 +1,5 @@
 import { Oklab } from "./oklab";
-/** @typedef {import("./matrix").Vector} Vector */
+/** @typedef {import("./linalg").Vector} Vector */
 
 /**
  * Description
