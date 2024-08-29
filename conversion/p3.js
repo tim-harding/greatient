@@ -4,18 +4,10 @@ import {
 } from "./srgb";
 import { Matrix } from "./matrix";
 
-/**
- * Convert a P3 channel from gamma-encoded to linear light.
- * @param {number} c
- * @return {number}
- */
+/** Convert a P3 channel from gamma to linear */
 export const gammaToLinear = srgbGammaToLinear;
 
-/**
- * Convert a P3 channel from gamma-encoded to linear light.
- * @param {number} c
- * @return {number}
- */
+/** Convert a P3 channel from gamma to linear */
 export const linearToGamma = srgbLinearToGamma;
 
 // prettier-ignore

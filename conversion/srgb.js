@@ -2,7 +2,7 @@ import { Matrix } from "./matrix";
 import { sign } from "./shared";
 
 /**
- * Convert an sRGB channel from gamma-encoded to linear light.
+ * Convert an sRGB channel from gamma to linear
  * @param {number} c
  * @return {number}
  */
@@ -14,7 +14,7 @@ export function gammaToLinear(c) {
 }
 
 /**
- * Convert an sRGB channel from linear light to gamma-encoded
+ * Convert an sRGB channel from linear to gamma
  * @param {number} c
  * @return {number}
  */
