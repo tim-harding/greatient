@@ -149,3 +149,10 @@ function linearToSrgb(c) {
   }
   return 12.92 * c;
 }
+
+/**
+ * Convert an {@kind Rgb} to an {@kind Xyz}
+ * @param {Rgb} rgb
+ * @return {Xyz}
+ */
+export function toXyz(rgb) {}
