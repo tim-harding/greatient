@@ -4,20 +4,20 @@ import { mulmat } from "./matrix";
 
 /**
  * @typedef {Object} Oklab
- * @property {"oklab"} kind
- * @property {Vector} v
+ * @property {number} l - Luminance in 0..1
+ * @property {number} a - a axis
+ * @property {number} b - b axis
  */
 
 /**
  * Create a new {@link Oklab}
- * @param {Vector} v
+ * @param {number} l - Luminance in 0..1
+ * @param {number} a - a axis
+ * @param {number} b - b axis
  * @returns {Oklab}
  */
-export function Oklab(v) {
-  return {
-    kind: "oklab",
-    v,
-  };
+export function Oklab(l, a, b) {
+  return { l, a, b };
 }
 
 // prettier-ignore

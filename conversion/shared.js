@@ -1,3 +1,9 @@
+/** Scalar to convert degrees to radians */
+export const DEG_TO_RAD = Math.PI / 180;
+
+/** Scalar to convert radians to degrees */
+export const RAD_TO_DEG = 180 / Math.PI;
+
 /**
  * Equivalent to `n % m`, except that negative numbers are turned positive.
  * @param {number} n - Number to take the modulus of

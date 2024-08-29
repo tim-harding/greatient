@@ -4,20 +4,20 @@ import { Oklab } from "./oklab";
 /**
  * Description
  * @typedef {Object} Oklch
- * @property {"oklch"} kind
- * @property {Vector} v
+ * @property {number} l - Luminance in 0..1
+ * @property {number} c - Chromiticity
+ * @property {number} h - Hue in radians -pi..pi
  */
 
 /**
  * Create a new {@link Oklch}
- * @param {Vector} v
+ * @param {number} l - Luminance in 0..1
+ * @param {number} c - Chromiticity
+ * @param {number} h - Hue in radians -pi..pi
  * @return {Oklch}
  */
-export function Oklch(v) {
-  return {
-    kind: "oklch",
-    v,
-  };
+export function Oklch(l, c, h) {
+  return { l, c, h };
 }
 
 /**
@@ -25,9 +25,8 @@ export function Oklch(v) {
  * @return {Oklch}
  */
 export function fromOklab(oklab) {
-  const [l, a, b] = oklab.v;
-  var hue = (Math.atan2(b, a) * 180) / Math.PI;
-  return Oklch([l, Math.sqrt(a ** 2 + b ** 2), hue >= 0 ? hue : hue + 360]);
+  const { l, a, b } = oklab;
+  return Oklch(l, Math.sqrt(a * a + b * b), Math.atan2(b, a));
 }
 
 /**
@@ -36,10 +35,10 @@ export function fromOklab(oklab) {
  * @return {Oklab}
  */
 export function toOklab(oklch) {
-  const [l, c, h] = oklch.v;
-  return Oklab([
+  const { l, c, h } = oklch;
+  return Oklab(
     l,
     c * Math.cos((h * Math.PI) / 180),
     c * Math.sin((h * Math.PI) / 180),
-  ]);
+  );
 }
