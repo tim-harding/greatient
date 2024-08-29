@@ -1,18 +1,40 @@
-export function labToLch(lab) {
-  const [l, a, b] = lab;
-  const hue = (Math.atan2(b, a) * 180) / Math.PI;
-  return [
-    l,
-    Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2)),
-    hue >= 0 ? hue : hue + 360,
-  ];
+import { Lab } from "./lab";
+
+/**
+ * A color in LCH
+ * @typedef {Object} Lch
+ * @property {number} l - Luminance 0..1
+ * @property {number} c - Chromiticity
+ * @property {number} h - Hue in radians -pi..pi
+ */
+
+/**
+ * Create a new {@link Lch}
+ * @param {number} l
+ * @param {number} c
+ * @param {number} h
+ * @return {Lch}
+ */
+export function Lch(l, c, h) {
+  return { l, c, h };
 }
 
-export function lchToLab(lch) {
+/**
+ * Convert a color from {@link Lab} to {@link Lch}
+ * @param {Lab} lab
+ * @return {Lch}
+ */
+export function fromLab(lab) {
+  const [l, a, b] = lab;
+  return [l, Math.sqrt(a * a + b * b), Math.atan2(b, a)];
+}
+
+/**
+ * Convert a color for {@link Lch} to {@link Lab}
+ * @param {Lch} lch
+ * @return {Lab}
+ */
+export function toLab(lch) {
   const [l, c, h] = lch;
-  return [
-    l,
-    c * Math.cos((h * Math.PI) / 180),
-    c * Math.sin((h * Math.PI) / 180),
-  ];
+  return Lab(l, c * Math.cos(h), c * Math.sin(h));
 }

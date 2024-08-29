@@ -8,9 +8,7 @@ import { sign } from "./shared";
  */
 export function gammaToLinear(c) {
   const abs = Math.abs(c);
-  return abs <= 0.04045
-    ? c / 12.92
-    : sign(c) * Math.pow((abs + 0.055) / 1.055, 2.4);
+  return abs <= 0.04045 ? c / 12.92 : sign(c) * ((abs + 0.055) / 1.055) ** 2.4;
 }
 
 /**
@@ -21,7 +19,7 @@ export function gammaToLinear(c) {
 export function linearToGamma(c) {
   const abs = Math.abs(c);
   return abs > 0.0031308
-    ? sign(c) * (1.055 * Math.pow(abs, 1 / 2.4) - 0.055)
+    ? sign(c) * (1.055 * abs ** (1 / 2.4) - 0.055)
     : 12.92 * c;
 }
 
