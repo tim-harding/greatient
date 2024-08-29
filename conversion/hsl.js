@@ -1,5 +1,8 @@
+import { Rgb } from "./rgb";
+import { fmod } from "./shared";
+
 /**
- * An HSL color
+ * An HSL color representation with CSS-incompatible values
  * @typedef {Object} Hsl
  * @property {number} h - Hue in 0..12
  * @property {number} s - Saturation in 0..1
@@ -7,26 +10,65 @@
  */
 
 /**
- * Create an {@link Hsl} from CSS syntax.
- * @param {number} h Hue in degrees
- * @param {number} s Saturation as a percentage (0-100)
- * @param {number} l Luminance as a percentage (0-100)
+ * A CSS HSL color
+ * @typedef {Object} CssHsl
+ * @property {number} h - Hue in 0..360
+ * @property {number} s - Saturation in 0..100
+ * @property {number} l - Luminance in 0..100
+ */
+
+/**
+ * Create an {@link Hsl}
+ * @param {number} h - Hue in 0..12
+ * @param {number} s - Saturation in 0..1
+ * @param {number} l - Luminance in 0..1
  * @returns {Hsl}
  */
 export function Hsl(h, s, l) {
-  return {
-    h: fmod(h / 30, 12),
-    s: fmod(s / 100, 1),
-    l: fmod(l / 100, 1),
-  };
+  return { h, s, l };
 }
 
 /**
- * Convert an RGB color to HSL
+ * Create a {@link CssHsl}
+ * @param {number} h - Hue in 0..360
+ * @param {number} s - Saturation in 0..100
+ * @param {number} l - Luminance in 0..100
+ * @returns {CssHsl}
+ */
+export function CssHsl(h, s, l) {
+  return { h, s, l };
+}
+
+/**
+ * Convert from {@link CssHsl} to {@link Hsl}
+ * @param {CssHsl} hsl
+ * @returns {Hsl}
+ */
+export function fromCss(hsl) {
+  const { h, s, l } = hsl;
+  return Hsl(fmod(h / 30, 12), clamp01(s / 100), clamp01(l / 100));
+}
+
+/**
+ * Convert from {@link Hsl} to {@link CssHsl}
+ * @param {Hsl} hsl
+ * @returns {CssHsl}
+ */
+export function toCss(hsl) {
+  function f(c) {
+    return Math.round(clamp(c * 100, 0, 100));
+  }
+
+  const { h, s, l } = hsl;
+  return CssHsl(Math.round(fmod(h * 30, 360)), f(s), f(l));
+}
+
+/**
+ * Convert from {@link Rgb} to {@link Hsl}
  * @param {Rgb} rgb
  * @return {Hsl}
  */
-function fromRgb(rgb) {
+export function fromRgb(rgb) {
   const { r, g, b } = rgb;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
@@ -48,11 +90,11 @@ function fromRgb(rgb) {
 
   h = (h % 6) * 2;
 
-  return { h, s, l };
+  return Hsl(h, s, l);
 }
 
 /**
- * Convert a color from HSL to RGB
+ * Convert from {@link Hsl} to {@link Rgb}
  * @param {Hsl} hsl - The color to convert
  * @returns {Rgb}
  */
@@ -61,11 +103,7 @@ export function toRgb(hsl) {
   const a = s * Math.min(l, 1 - l);
   function f(n) {
     const k = (h + n) % 12;
-    return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
   }
-  return {
-    r: f(0),
-    g: f(8),
-    b: f(4),
-  };
+  return Rgb(f(0), f(8), f(4));
 }
