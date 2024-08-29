@@ -1,3 +1,62 @@
+/***************************************************
+ *                   Whitepoint                    *
+ ***************************************************/
+
+const D50 = [0.3457 / 0.3585, 1.0, (1.0 - 0.3457 - 0.3585) / 0.3585];
+const D65 = [0.3127 / 0.329, 1.0, (1.0 - 0.3127 - 0.329) / 0.329];
+
+// prettier-ignore
+/** @type {import("./matrix").Matrix} */
+export const D65_TO_D50 =  [
+   1.047929792544996900, 0.022946870601609652, -0.050192266289205240,
+   0.029627808770055990, 0.990434426753879900, -0.017073799063418826,
+  -0.009243040646204504, 0.015055191490298152,  0.751874281428137100,
+];
+
+// prettier-ignore
+/** @type {import("./matrix").Matrix} */
+export const D50_TO_D65 = [
+   0.955473421488075000, -0.023098454948764710, 0.063259243200570720,
+  -0.028369709333863700,  1.009995398081304100, 0.021041441191917323,
+   0.012314014864481998, -0.020507649298898964, 1.330365926242124000,
+];
+
+/*********************************************
+ *                   sRGB                    *
+ *********************************************/
+
+/**
+ * Convert an sRGB color from gamma-encoded to linear light.
+ * @param {Vector} rgb
+ * @return {Vector}
+ */
+export function srgbGammaExpand(rgb) {
+  return rgb.map(srgbTransfer);
+}
+
+function srgbTransfer(c) {
+  const abs = Math.abs(c);
+  return abs <= 0.04045
+    ? c / 12.92
+    : (c < 0 ? -1 : 1) * Math.pow((abs + 0.055) / 1.055, 2.4);
+}
+
+/**
+ * Convert an sRGB color from linear light to gamma-encoded
+ * @param {Vector} rgb
+ * @return {Vector}
+ */
+export function srgbGammaCompress(rgb) {
+  return rgb.map(srgbTransferInverse);
+}
+
+function srgbTransferInverse(c) {
+  let abs = Math.abs(c);
+  return abs > 0.0031308
+    ? (c < 0 ? -1 : 1) * (1.055 * Math.pow(abs, 1 / 2.4) - 0.055)
+    : 12.92 * c;
+}
+
 // prettier-ignore
 /** @type {import("./matrix").Matrix} */
 export const SRGB_TO_XYZ = [
@@ -13,6 +72,13 @@ export const XYZ_TO_SRGB = [
   -851781 / 878810, 1648619 / 878810, 36519 / 878810,
       705 /  12673,   -2585 /  12673,   705 /    667,
 ];
+
+/*******************************************
+ *                   p3                    *
+ *******************************************/
+
+export const p3GammaExpand = srgbGammaExpand;
+export const p3GammaCompress = srgbGammaCompress;
 
 // prettier-ignore
 /** @type {import("./matrix").Matrix} */
@@ -30,6 +96,40 @@ export const XYZ_TO_P3 = [
    11844 / 330415,  -50337 / 660830, 316169 / 330415,
 ];
 
+/*************************************************
+ *                   ProPhoto                    *
+ *************************************************/
+const Et2 = 16 / 512;
+const Et = 1 / 512;
+
+/**
+ * Convert a ProPhoto color from gamma-encoded to linear light.
+ * @param {Vector} rgb
+ * @return {Vector}
+ */
+export function prophotoGammaExpand(rgb) {
+  return rgb.map(prophotoTransfer);
+}
+
+function prophotoTransfer(c) {
+  const abs = Math.abs(c);
+  return abs <= Et2 ? c / 16 : (c < 0 ? -1 : 1) * Math.pow(abs, 1.8);
+}
+
+/**
+ * Convert a ProPhoto color from linear light to gamma-encoded
+ * @param {Vector} rgb
+ * @return {Vector}
+ */
+export function prophotoGammaCompress(rgb) {
+  return rgb.map(prophotoTransferInverse);
+}
+
+function prophotoTransferInverse(c) {
+  let abs = Math.abs(c);
+  return abs >= Et ? (c < 0 ? -1 : 1) * Math.pow(abs, 1 / 1.8) : 16 * c;
+}
+
 // prettier-ignore
 /** @type {import("./matrix").Matrix} */
 export const PROPHOTO_TO_XYZ = [
@@ -45,6 +145,18 @@ export const XYZ_TO_PROPHOTO = [
   -0.54463070512490190,  1.50824774284514680,  0.02052744743642139,
    0.00000000000000000,  0.00000000000000000,  1.21196754563894520,
 ];
+
+/********************************************
+ *                   A98                    *
+ ********************************************/
+
+export function a98GammaToLinear(c) {
+  return (c < 0 ? -1 : 1) * Math.pow(Math.abs(c), 563 / 256);
+}
+
+export function a98LinearToGamma(c) {
+  return (c < 0 ? -1 : 1) * Math.pow(Math.abs(c), 256 / 563);
+}
 
 // prettier-ignore
 /** @type {import("./matrix").Matrix} */
@@ -62,6 +174,27 @@ export const XYZ_TO_A98 = [
     16779 / 1248040, -147721 / 1248040, 1266979 / 1248040,
 ];
 
+/************************************************
+ *                   rec2020                    *
+ ************************************************/
+
+const alpha = 1.09929682680944;
+const beta = 0.018053968510807;
+
+export function rec2020GammaToLinear(c) {
+  const abs = Math.abs(c);
+  return abs < beta * 4.5
+    ? c / 4.5
+    : sign(c) * Math.pow((abs + alpha - 1) / alpha, 1 / 0.45);
+}
+
+export function rec2020LinearToGamma(c) {
+  const abs = Math.abs(c);
+  return abs > beta
+    ? sign(c) * (alpha * Math.pow(abs, 0.45) - (alpha - 1))
+    : 4.5 * c;
+}
+
 // prettier-ignore
 /** @type {import("./matrix").Matrix} */
 export const REC2020_TO_XYZ = [
@@ -78,21 +211,81 @@ export const XYZ_TO_REC2020 = [
      792561 / 44930125, -1921689 / 44930125, 42328811 / 44930125,
 ];
 
-// prettier-ignore
-/** @type {import("./matrix").Matrix} */
-export const D65_TO_D50 =  [
-   1.047929792544996900, 0.022946870601609652, -0.050192266289205240,
-   0.029627808770055990, 0.990434426753879900, -0.017073799063418826,
-  -0.009243040646204504, 0.015055191490298152,  0.751874281428137100,
-];
+export function xyzToLab(xyz) {
+  // Assuming XYZ is relative to D50, convert to CIE Lab
+  // from CIE standard, which now defines these as a rational fraction
+  var epsilon = 216 / 24389; // 6^3/29^3
+  var kappa = 24389 / 27; // 29^3/3^3
 
-// prettier-ignore
-/** @type {import("./matrix").Matrix} */
-export const D50_TO_D65 = [
-   0.955473421488075000, -0.023098454948764710, 0.063259243200570720,
-  -0.028369709333863700,  1.009995398081304100, 0.021041441191917323,
-   0.012314014864481998, -0.020507649298898964, 1.330365926242124000,
-];
+  // Scale relative to reference white
+  xyz = xyz.map((value, i) => value / D50[i]);
+
+  // now compute f
+  const f = xyz.map((value) =>
+    value > epsilon ? Math.cbrt(value) : (kappa * value + 16) / 116,
+  );
+
+  return [116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])];
+}
+
+export function labToXyz(Lab) {
+  // Convert Lab to D50-adapted XYZ
+  // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+  var kappa = 24389 / 27; // 29^3/3^3
+  var epsilon = 216 / 24389; // 6^3/29^3
+  var f = [];
+
+  // compute f, starting with the luminance-related term
+  f[1] = (Lab[0] + 16) / 116;
+  f[0] = Lab[1] / 500 + f[1];
+  f[2] = f[1] - Lab[2] / 200;
+
+  // compute xyz
+  var xyz = [
+    Math.pow(f[0], 3) > epsilon ? Math.pow(f[0], 3) : (116 * f[0] - 16) / kappa,
+    Lab[0] > kappa * epsilon
+      ? Math.pow((Lab[0] + 16) / 116, 3)
+      : Lab[0] / kappa,
+    Math.pow(f[2], 3) > epsilon ? Math.pow(f[2], 3) : (116 * f[2] - 16) / kappa,
+  ];
+
+  // Compute XYZ by scaling xyz by reference white
+  return xyz.map((value, i) => value * D50[i]);
+}
+
+export function labToLch(Lab) {
+  // Convert to polar form
+  var hue = (Math.atan2(Lab[2], Lab[1]) * 180) / Math.PI;
+  return [
+    Lab[0], // L is still L
+    Math.sqrt(Math.pow(Lab[1], 2) + Math.pow(Lab[2], 2)), // Chroma
+    hue >= 0 ? hue : hue + 360, // Hue, in degrees [0 to 360)
+  ];
+}
+
+export function lchToLab(LCH) {
+  // Convert from polar form
+  return [
+    LCH[0], // L is still L
+    LCH[1] * Math.cos((LCH[2] * Math.PI) / 180), // a
+    LCH[1] * Math.sin((LCH[2] * Math.PI) / 180), // b
+  ];
+}
+
+export function oklabToOklch(oklab) {
+  const [l, a, b] = oklab;
+  var hue = (Math.atan2(b, a) * 180) / Math.PI;
+  return [l, Math.sqrt(a ** 2 + b ** 2), hue >= 0 ? hue : hue + 360];
+}
+
+export function oklchToOklab(oklch) {
+  const [l, c, h] = oklch;
+  return [
+    l,
+    c * Math.cos((h * Math.PI) / 180),
+    c * Math.sin((h * Math.PI) / 180),
+  ];
+}
 
 // prettier-ignore
 /** @type {import("./matrix").Matrix} */

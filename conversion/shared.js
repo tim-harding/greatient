@@ -27,3 +27,12 @@ export function clamp(n, min, max) {
 export function clamp01(n) {
   return clamp(n, 0, 1);
 }
+
+/**
+ * The sign of the given number
+ * @param {number} n
+ * @return {number}
+ */
+export function sign(n) {
+  return n < 0 ? -1 : 1;
+}
