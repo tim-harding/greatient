@@ -1,22 +1,3 @@
-export function labToLch(Lab) {
-  // Convert to polar form
-  var hue = (Math.atan2(Lab[2], Lab[1]) * 180) / Math.PI;
-  return [
-    Lab[0], // L is still L
-    Math.sqrt(Math.pow(Lab[1], 2) + Math.pow(Lab[2], 2)), // Chroma
-    hue >= 0 ? hue : hue + 360, // Hue, in degrees [0 to 360)
-  ];
-}
-
-export function lchToLab(LCH) {
-  // Convert from polar form
-  return [
-    LCH[0], // L is still L
-    LCH[1] * Math.cos((LCH[2] * Math.PI) / 180), // a
-    LCH[1] * Math.sin((LCH[2] * Math.PI) / 180), // b
-  ];
-}
-
 export function oklabToOklch(oklab) {
   const [l, a, b] = oklab;
   var hue = (Math.atan2(b, a) * 180) / Math.PI;
