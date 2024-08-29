@@ -16,7 +16,7 @@
  * Multiply two 3×3 matrices
  * @param {Matrix} a
  * @param {Matrix} b
- * @return {Matrix}
+ * @returns {Matrix}
  */
 export function mulmat(a, b) {
   const o = [0, 0, 0, 0, 0, 0, 0, 0, 0];
