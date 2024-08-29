@@ -60,6 +60,7 @@ export function toCss(hwb) {
   function f(c) {
     return Math.round(clamp(c * 100, 0, 100));
   }
+
   const { h, w, b } = hwb;
   return CssHwb(Math.round(fmod(h * 30, 360)), f(w), f(b));
 }
@@ -70,15 +71,16 @@ export function toCss(hwb) {
  * @return {Rgb}
  */
 export function toRgb(hwb) {
+  function f(c) {
+    return c * m + w;
+  }
+
   const { h, w, b } = hwb;
   if (w + b >= 1) {
     const gray = w / (w + b);
     return { r: gray, g: gray, b: gray };
   }
   const m = 1 - w - b;
-  function f(c) {
-    return c * m + w;
-  }
   const { r, g, b: b_ } = hslToRgb(Hsl(h, 1, 0.5));
   return Rgb(f(r), f(g), f(b_));
 }

@@ -89,7 +89,6 @@ export function fromRgb(rgb) {
   }
 
   h = (h % 6) * 2;
-
   return Hsl(h, s, l);
 }
 
