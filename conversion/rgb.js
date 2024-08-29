@@ -45,7 +45,7 @@ export function CssRgb(r, g, b) {
  */
 export function fromCss(rgb) {
   function f(c) {
-    return clamp01(c / 255);
+    return srgbToLinear(clamp01(c / 255));
   }
 
   const { r, g, b } = rgb;
@@ -60,7 +60,7 @@ export function fromCss(rgb) {
  */
 export function toCss(rgb) {
   function f(c) {
-    return Math.round(clamp(c * 255, 0, 255));
+    return Math.round(clamp(linearToSrgb(c) * 255, 0, 255));
   }
 
   const { r, g, b } = rgb;
@@ -125,4 +125,27 @@ export function toHex(rgb) {
     b / 16 + 97,
     b % 16 + 97,
   );
+}
+
+/**
+ * Convert an RGB channel from sRGB to linear RGB
+ * @param {number} c - An RGB color channel
+ */
+function srgbToLinear(c) {
+  const abs = Math.abs(c);
+  return abs <= 0.04045
+    ? c / 12.92
+    : (c < 0 ? -1 : 1) * Math.pow((abs + 0.055) / 1.055, 2.4);
+}
+
+/**
+ * Convert an RGB channel from linear RGB to sRGB
+ * @param {number} c - An RGB color channel
+ */
+function linearToSrgb(c) {
+  const abs = Math.abs(c);
+  if (abs > 0.0031308) {
+    return (c < 0 ? -1 : 1) * (1.055 * Math.pow(abs, 1 / 2.4) - 0.055);
+  }
+  return 12.92 * c;
 }
