@@ -1,8 +1,24 @@
 import { mulmat } from "./matrix";
+/** @typedef {import("./matrix").Matrix} Matrix */
+/** @typedef {import("./matrix").Vector} Vector */
 
 /**
- * @typedef {import("./matrix").Matrix} Matrix
+ * @typedef {Object} Oklab
+ * @property {"oklab"} kind
+ * @property {Vector} v
  */
+
+/**
+ * Create a new {@link Oklab}
+ * @param {Vector} v
+ * @returns {Oklab}
+ */
+export function Oklab(v) {
+  return {
+    kind: "oklab",
+    v,
+  };
+}
 
 // prettier-ignore
 /** @type {Matrix} */
