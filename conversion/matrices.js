@@ -1,4 +1,5 @@
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const SRGB_TO_XYZ = [
   506752 / 1228815,  87881 / 245763,   12673 /   70218,
    87098 /  409605, 175762 / 245763,   12673 /  175545,
@@ -6,6 +7,7 @@ export const SRGB_TO_XYZ = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const XYZ_TO_SRGB = [
     12831 /   3959,    -329 /    214, -1974 /   3959,
   -851781 / 878810, 1648619 / 878810, 36519 / 878810,
@@ -13,6 +15,7 @@ export const XYZ_TO_SRGB = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const P3_TO_XYZ = 	 [
   608311 / 1250200, 189793 / 714400,  198249 / 1000160,
    35783 /  156275, 247089 / 357200,  198249 / 2500400,
@@ -20,6 +23,7 @@ export const P3_TO_XYZ = 	 [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const XYZ_TO_P3 = [
   446124 / 178915, -333277 / 357830, -72051 / 178915,
   -14852 /  17905,   63121 /  35810,    423 /  17905,
@@ -27,6 +31,7 @@ export const XYZ_TO_P3 = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const PROPHOTO_TO_XYZ = [
   0.79776664490064230, 0.13518129740053308, 0.03134773412839220,
   0.28807482881940130, 0.71183523424187300, 0.00008993693872564,
@@ -34,6 +39,7 @@ export const PROPHOTO_TO_XYZ = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const XYZ_TO_PROPHOTO = [
    1.34578688164715830, -0.25557208737979464, -0.05110186497554526,
   -0.54463070512490190,  1.50824774284514680,  0.02052744743642139,
@@ -41,6 +47,7 @@ export const XYZ_TO_PROPHOTO = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const A98_TO_XYZ = [
   573536 /  994567,  263643 / 1420810,  187206 /  994567,
   591459 / 1989134, 6239551 / 9945670,  374412 / 4972835,
@@ -48,6 +55,7 @@ export const A98_TO_XYZ = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const XYZ_TO_A98 = [
   1829569 /  896150, -506331 /  896150, -308931 /  896150,
   -851781 /  878810, 1648619 /  878810,   36519 /  878810,
@@ -55,6 +63,7 @@ export const XYZ_TO_A98 = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const REC2020_TO_XYZ = [
   63426534 / 99577255,  20160776 / 139408157,  47086771 / 278816314,
   26158966 / 99577255, 472592308 / 697040785,   8267143 / 139408157,
@@ -62,6 +71,7 @@ export const REC2020_TO_XYZ = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const XYZ_TO_REC2020 = [
    30757411 / 17917100, -6372589 / 17917100, -4539589 / 17917100,
   -19765991 / 29648200, 47925759 / 29648200,   467509 / 29648200,
@@ -69,6 +79,7 @@ export const XYZ_TO_REC2020 = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const D65_TO_D50 =  [
    1.047929792544996900, 0.022946870601609652, -0.050192266289205240,
    0.029627808770055990, 0.990434426753879900, -0.017073799063418826,
@@ -76,6 +87,7 @@ export const D65_TO_D50 =  [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const D50_TO_D65 = [
    0.955473421488075000, -0.023098454948764710, 0.063259243200570720,
   -0.028369709333863700,  1.009995398081304100, 0.021041441191917323,
@@ -83,6 +95,7 @@ export const D50_TO_D65 = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const XYZ_TO_LMS = [
   0.8190224379967030, 0.3619062600528904, -0.1288737815209879,
   0.0329836539323885, 0.9292868615863434,  0.0361446663506424,
@@ -90,6 +103,7 @@ export const XYZ_TO_LMS = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const  LMS_TO_OKLAB = [
   0.2104542683093140,  0.7936177747023054, -0.0040720430116193,
   1.9779985324311684, -2.4285922420485799,  0.4505937096174110,
@@ -97,6 +111,7 @@ export const  LMS_TO_OKLAB = [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const LMS_TO_XYZ =  [
    1.2268798758459243, -0.5578149944602171,  0.2813910456659647,
   -0.0405757452148008,  1.1122868032803170, -0.0717110580655164,
@@ -104,6 +119,7 @@ export const LMS_TO_XYZ =  [
 ];
 
 // prettier-ignore
+/** @type {import("./matrix").Matrix} */
 export const OKLAB_TO_LMS = [
   1.0000000000000000,  0.3963377773761749,  0.2158037573099136,
   1.0000000000000000, -0.1055613458156586, -0.0638541728258133,

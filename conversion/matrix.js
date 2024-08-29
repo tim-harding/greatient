@@ -4,7 +4,7 @@
  */
 
 /**
- * A 3×3 matrix
+ * A column-major 3×3 matrix
  * @typedef {[
  *     number, number, number,
  *     number, number, number,
@@ -13,7 +13,7 @@
  */
 
 /**
- * Multiply two 3×3 matrices
+ * Multiply two column-major 3×3 matrices
  * @param {Matrix} a
  * @param {Matrix} b
  * @returns {Matrix}
@@ -32,7 +32,7 @@ export function mulmat(a, b) {
 }
 
 /**
- * Multiply a 3×3 matrix with a 3D vector
+ * Multiply a column-major 3×3 matrix with a 3D vector
  * @param {Matrix} m
  * @param {Vector} v
  * @returns {Vector}
