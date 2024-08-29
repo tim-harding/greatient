@@ -1,5 +1,4 @@
 import { Oklab } from "./oklab";
-/** @typedef {import("./linalg").Vector} Vector */
 
 /**
  * Description

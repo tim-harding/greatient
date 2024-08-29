@@ -1,6 +1,4 @@
-import { mulmat } from "./linalg";
-/** @typedef {import("./linalg").Matrix} Matrix */
-/** @typedef {import("./linalg").Vector} Vector */
+import { Matrix, mulmat } from "./linalg";
 
 /**
  * @typedef {Object} Oklab
