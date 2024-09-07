@@ -1,7 +1,9 @@
 /**
+ * Create a WebGL program from the given shaders.
  * @param {WebGL2RenderingContext} gl
  * @param {WebGLShader} vertexShader
  * @param {WebGLShader} fragmentShader
+ * @return {WebGLProgram}
  */
 export function createProgram(gl, vertexShader, fragmentShader) {
   const program = gl.createProgram();
@@ -20,9 +22,24 @@ export function createProgram(gl, vertexShader, fragmentShader) {
 }
 
 /**
+ * Create a WebGL program from the given shader source code
+ * @param {WebGL2RenderingContext} gl
+ * @param {string} vertexSource
+ * @param {string} fragmentSource
+ * @return {WebGLProgram}
+ */
+export function createProgramFromSources(gl, vertexSource, fragmentSource) {
+  const vertex = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+  const fragment = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+  return createProgram(gl, vertex, fragment);
+}
+
+/**
+ * Create a WebGL shader from source code
  * @param {WebGL2RenderingContext} gl
  * @param {GLenum} type
  * @param {string} source
+ * @return {WebGLShader}
  */
 export function createShader(gl, type, source) {
   const shader = gl.createShader(type);
@@ -39,10 +56,32 @@ export function createShader(gl, type, source) {
   return shader;
 }
 
+/**
+ * Create a WebGL buffer
+ * @param {WebGL2RenderingContext} gl
+ * @return {WebGLBuffer}
+ */
+export function createBuffer(gl) {
+  const buffer = gl.createBuffer();
+  if (buffer === null) throw glError(gl);
+  return buffer;
+}
+
+/**
+ * Create a WebGL Vertex Array Object
+ * @param {WebGL2RenderingContext} gl
+ * @return {WebGLVertexArrayObject}
+ */
+export function createVao(gl) {
+  const vao = gl.createVertexArray();
+  if (vao === null) throw glError(gl);
+  return vao;
+}
+
 // From GLenum. See also
 // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getError
 const GL_ERROR_MESSAGES = new Map([
-  [0, "NO_ERROR (Unreachable!)"],
+  [0, "NO_ERROR"],
   [1280, "INVALID_ENUM"],
   [1281, "INVALID_VALUE"],
   [1282, "INVALID_OPERATION"],
@@ -52,6 +91,7 @@ const GL_ERROR_MESSAGES = new Map([
 ]);
 
 /**
+ * Get the current WebGL error
  * @param {WebGL2RenderingContext} gl
  * @return {Error}
  */

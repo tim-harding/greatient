@@ -1,7 +1,51 @@
+import { createBuffer, createProgramFromSources, createVao } from "../webgl";
+import { FRAGMENT_SOURCE, VERTEX_SOURCE } from "./shader";
+
+/** Offset from anchor point index for the north handle */
 const N = 2;
+/** Offset from anchor point index for the east handle */
 const E = 4;
+/** Offset from anchor point index for the south handle */
 const S = 6;
+/** Offset from anchor point index for the west handle */
 const W = 8;
+
+/**
+ * Generates each array element of an instance mesh, which consists of the (u,v)
+ * coordinates from (0,0) through (1,1).
+ * @param {number} subdivisions Number of edges to insert between control points
+ * @yields {number}
+ */
+function* instanceMeshElements(subdivisions) {
+  const dim = subdivisions + 2;
+  for (let y = 0; y < dim + 1; y++) {
+    for (let x = 0; x < dim + 1; x++) {
+      yield x / dim;
+      yield y / dim;
+    }
+  }
+}
+
+/**
+ * @param {WebGL2RenderingContext} gl
+ * @param {number} subdivisions Number of edges to insert between control points
+ */
+export function instanceMesh(gl, subdivisions) {
+  const mesh = new Float32Array(instanceMeshElements(subdivisions));
+  const vbo = createBuffer(gl);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+  gl.bufferData(gl.ARRAY_BUFFER, mesh, gl.STATIC_DRAW);
+
+  const vao = createVao(gl);
+  gl.bindVertexArray(vao);
+}
+
+/**
+ * @param {WebGL2RenderingContext} gl
+ */
+export function program(gl) {
+  return createProgramFromSources(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
+}
 
 /**
  * Create a array containing the control points of a bezier control mesh.
@@ -55,87 +99,63 @@ export function resize(
 
 /**
  * Compute the patch matrix P for the bezier patch at index (x,y)
- * @param {Float32Array} controlPoints
+ * @param {Float32Array} mesh Bezier control points data structure
  * @param {number} x Patch x-index
  * @param {number} y Patch y-index
  * @param {number} w Control mesh width in control points
+ * @param {"x" | "y"} axis The patch matrix axis, either x or y
+ * @return {Float32Array}
  */
-export function patchMatrix(controlPoints, x, y, w) {
-  const nw = index(x, y, w);
-  const ne = index(x + 1, y, w);
-  const sw = index(x, y + 1, w);
-  const se = index(x + 1, y + 1, w);
+export function patchMatrix(mesh, x, y, w, axis) {
+  const o = axis === "x" ? 0 : 1;
 
-  const nwax = controlPoints[nw];
-  const nway = controlPoints[nw + 1];
-  const nwhx = controlPoints[nw + E];
-  const nwhy = controlPoints[nw + E + 1];
-  const nwvx = controlPoints[nw + S];
-  const nwvy = controlPoints[nw + S + 1];
+  const nw = index(x, y, w) + o;
+  const ne = index(x + 1, y, w) + o;
+  const sw = index(x, y + 1, w) + o;
+  const se = index(x + 1, y + 1, w) + o;
 
-  const neax = controlPoints[ne];
-  const neay = controlPoints[ne + 1];
-  const nehx = controlPoints[ne + W];
-  const nehy = controlPoints[ne + W + 1];
-  const nevx = controlPoints[ne + S];
-  const nevy = controlPoints[ne + S + 1];
+  const nwa = mesh[nw];
+  const nwh = mesh[nw + E];
+  const nwv = mesh[nw + S];
 
-  const swax = controlPoints[sw];
-  const sway = controlPoints[sw + 1];
-  const swhx = controlPoints[sw + E];
-  const swhy = controlPoints[sw + E + 1];
-  const swvx = controlPoints[sw + N];
-  const swvy = controlPoints[sw + N + 1];
+  const nea = mesh[ne];
+  const neh = mesh[ne + W];
+  const nev = mesh[ne + S];
 
-  const seax = controlPoints[se];
-  const seay = controlPoints[se + 1];
-  const sehx = controlPoints[se + W];
-  const sehy = controlPoints[se + W + 1];
-  const sevx = controlPoints[se + N];
-  const sevy = controlPoints[se + N + 1];
+  const swa = mesh[sw];
+  const swh = mesh[sw + E];
+  const swv = mesh[sw + N];
 
-  const p00x = nwax;
-  const p00y = nway;
-  const p01x = nwax + nwhx;
-  const p01y = nway + nwhy;
-  const p02x = neax + nehx;
-  const p02y = neay + nehy;
-  const p03x = neax;
-  const p03y = neay;
+  const sea = mesh[se];
+  const seh = mesh[se + W];
+  const sev = mesh[se + N];
 
-  const p10x = nwax + nwvx;
-  const p10y = nway + nwvy;
-  const p11x = nwax + nwvx + nwhx;
-  const p11y = nway + nwvy + nwhy;
-  const p12x = neax + nevx + nehx;
-  const p12y = neay + nevy + nehy;
-  const p13x = neax + nevx;
-  const p13y = neay + nevy;
+  const p00 = nwa;
+  const p01 = nwa + nwh;
+  const p02 = nea + neh;
+  const p03 = nea;
 
-  const p20x = swax + swvx;
-  const p20y = sway + swvy;
-  const p21x = swax + swvx + swhx;
-  const p21y = sway + swvy + swhy;
-  const p22x = seax + sevx + sehx;
-  const p22y = seay + sevy + sehy;
-  const p23x = seax + sevx;
-  const p23y = seay + sevy;
+  const p10 = nwa + nwv;
+  const p11 = nwa + nwv + nwh;
+  const p12 = nea + nev + neh;
+  const p13 = nea + nev;
 
-  const p30x = swax;
-  const p30y = sway;
-  const p31x = swax + swhx;
-  const p31y = sway + swhy;
-  const p32x = seax + sehx;
-  const p32y = seay + sehy;
-  const p33x = seax;
-  const p33y = seay;
+  const p20 = swa + swv;
+  const p21 = swa + swv + swh;
+  const p22 = sea + sev + seh;
+  const p23 = sea + sev;
+
+  const p30 = swa;
+  const p31 = swa + swh;
+  const p32 = sea + seh;
+  const p33 = sea;
 
   // prettier-ignore
   return new Float32Array([
-    p00x, p00y, p01x, p01y, p02x, p02y, p03x, p03y,
-    p10x, p10y, p11x, p11y, p12x, p12y, p13x, p13y,
-    p20x, p20y, p21x, p21y, p22x, p22y, p23x, p23y,
-    p30x, p30y, p31x, p31y, p32x, p32y, p33x, p33y,
+    p00, p01, p02, p03,
+    p10, p11, p12, p13,
+    p20, p21, p22, p23,
+    p30, p31, p32, p33,
   ])
 }
 
