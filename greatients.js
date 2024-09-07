@@ -1,91 +1,148 @@
-// TODO: Resize the canvas
-// https://webgl2fundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
+// TODO: Stop and resume gradient canvas
 
-function main() {
-  Promise.all([
-    fetchShaderSource("/vertex.glsl"),
-    fetchShaderSource("/fragment.glsl"),
-  ]).then(([vertexSource, fragmentSource]) =>
-    init(vertexSource, fragmentSource),
-  );
+const VERTEX_SOURCE = `\
+#version 300 es
+
+in vec2 a_position;
+// uniform vec2 u_resolution;
+
+void main() {
+    gl_Position = vec4(a_position, 0, 1);
 }
+`;
 
-/**
- * @param {URL} filename
- * @return {Promise<string>}
- */
-async function fetchShaderSource(url) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `${response.status} response for ${url}: ${response.statusText}`,
+const FRAGMENT_SOURCE = `\
+#version 300 es
+
+precision highp float;
+
+out vec4 outColor;
+
+void main() {
+    outColor = vec4(1, 0, 0.5, 1);
+}
+`;
+
+export class Greatient {
+  #boundingClientRect = { width: 0, height: 0 };
+  /** @type {HTMLCanvasElement} */
+  #canvas;
+  /** @type {WebGL2RenderingContext} */
+  #gl;
+  /** @type {WebGLProgram} */
+  #program;
+  /** @type {WebGLVertexArrayObject} */
+  #vao;
+  /** @type {GLint} */
+  #attributePosition;
+
+  /**
+   * @param {HTMLCanvasElement} canvas
+   */
+  constructor(canvas) {
+    this.#canvas = canvas;
+
+    const gl = canvas.getContext("webgl2", {
+      alpha: false,
+      premultipliedAlpha: true,
+      depth: true,
+      antialias: true,
+      preserveDrawingBuffer: true,
+      powerPreference: "low-power",
+    });
+    if (!gl) throw new Error("WebGL2 not available");
+    this.#gl = gl;
+
+    if (window.matchMedia("(color-gamut: p3)").matches) {
+      gl.drawingBufferColorSpace = "display-p3";
+    }
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SOURCE);
+    const fragmentShader = createShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      FRAGMENT_SOURCE,
     );
-  }
-  const text = await response.text();
-  if (!(typeof text === "string")) {
-    throw new Error("Expected a string response body");
-  }
-  return text;
-}
 
-/**
- * @param {string} vertexSource
- * @param {string} fragmentSource
- */
-function init(vertexSource, fragmentSource) {
-  const canvas = document.getElementById("gradient");
-  if (!(canvas instanceof HTMLCanvasElement)) {
-    throw new Error("Expected a canvas element");
-  }
-  const gl = canvas.getContext("webgl2", {
-    alpha: false,
-    premultipliedAlpha: true,
-    depth: true,
-    antialias: true,
-    preserveDrawingBuffer: true,
-    powerPreference: "low-power",
-  });
-  if (!gl) {
-    console.error("WebGL2 not available");
-    return;
+    const program = createProgram(gl, vertexShader, fragmentShader);
+    this.#program = program;
+
+    this.#attributePosition = gl.getAttribLocation(program, "a_position");
+
+    const positionBuffer = gl.createBuffer();
+    if (!positionBuffer) throw glError(gl);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    const positions = [
+      -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    const vao = gl.createVertexArray();
+    if (!vao) throw glError(gl);
+    this.#vao = vao;
+
+    /**
+     * @param {number} width
+     * @param {number} height
+     */
+    const handleResizeShared = (width, height) => {
+      canvas.width = width;
+      canvas.height = height;
+      gl.viewport(0, 0, width, height);
+      this._redrawImmediate();
+    };
+    let resize = new ResizeObserver((entries) => {
+      const size = entries[0].devicePixelContentBoxSize[0];
+      handleResizeShared(size.inlineSize, size.blockSize);
+    });
+    try {
+      resize.observe(canvas, { box: "device-pixel-content-box" });
+    } catch (e) {
+      // Safari still doesn't support device-pixel-content-box :/
+      resize = new ResizeObserver((entries) => {
+        let { inlineSize: width, blockSize: height } =
+          entries[0].contentBoxSize[0];
+        const dpr = window.devicePixelRatio;
+        handleResizeShared(width * dpr, height * dpr);
+      });
+      resize.observe(canvas, { box: "content-box" });
+    }
   }
 
-  if (window.matchMedia("(color-gamut: p3)").matches) {
-    gl.drawingBufferColorSpace = "display-p3";
+  /**
+   * Repaint the canvas. When manually driving gradient animations, this should
+   * be called in a `requestAnimationFrame` callback.
+   */
+  redraw() {
+    const rect = this.#canvas.getBoundingClientRect();
+    const rectPrev = this.#boundingClientRect;
+    if (rect.width != rectPrev.width || rect.height != rectPrev.height) {
+      // Handle drawing in the ResizeObserver callback instead.
+      this.#boundingClientRect = rect;
+      return;
+    }
+    this._redrawImmediate();
   }
-  gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-  const program = createProgram(gl, vertexShader, fragmentShader);
-  const positionAttribute = gl.getAttribLocation(program, "a_position");
-  const resolutionUniform = gl.getUniformLocation(program, "u_resolution");
-  const positionBuffer = gl.createBuffer();
-  if (!positionBuffer) throw glError(gl);
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  const positions = [
-    -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-  const vao = gl.createVertexArray();
-  if (!vao) throw glError(gl);
 
-  const resize = new ResizeObserver((entries) => {
-    const { inlineSize: width, blockSize: height } =
-      entries[0].devicePixelContentBoxSize[0];
-    canvas.width = width;
-    canvas.height = height;
-    gl.viewport(0, 0, width, height);
+  /**
+   * Execute the WebGL canvas drawing commands.
+   * @private
+   */
+  _redrawImmediate() {
+    const gl = this.#gl;
+    const program = this.#program;
+    const posAttr = this.#attributePosition;
+
     gl.clearColor(0, 0.2, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.useProgram(program);
-    gl.bindVertexArray(vao);
-    gl.enableVertexAttribArray(positionAttribute);
-    gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2f(resolutionUniform, width, height);
+    gl.bindVertexArray(this.#vao);
+    gl.enableVertexAttribArray(posAttr);
+    gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-  });
-  resize.observe(canvas, { box: "device-pixel-content-box" });
+  }
 }
 
 /**
@@ -102,8 +159,9 @@ function createProgram(gl, vertexShader, fragmentShader) {
   /** @type {GLboolean} */
   const success = gl.getProgramParameter(program, gl.LINK_STATUS);
   if (!success) {
+    const log = gl.getProgramInfoLog(program) || "UNREACHABLE";
     gl.deleteProgram(program);
-    throw new Error(gl.getProgramInfoLog(program));
+    throw new Error(log);
   }
   return program;
 }
@@ -121,34 +179,31 @@ function createShader(gl, type, source) {
   /** @type {GLboolean} */
   const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
   if (!success) {
+    const log = gl.getShaderInfoLog(shader) || "UNREACHABLE";
     gl.deleteShader(shader);
-    throw new Error(gl.getShaderInfoLog(shader));
+    throw new Error(log);
   }
   return shader;
 }
+
+// From GLenum. See also
+// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getError
+const GL_ERROR_MESSAGES = new Map([
+  [0, "NO_ERROR (Unreachable!)"],
+  [1280, "INVALID_ENUM"],
+  [1281, "INVALID_VALUE"],
+  [1282, "INVALID_OPERATION"],
+  [1285, "OUT_OF_MEMORY"],
+  [1286, "INVALID_FRAMEBUFFER_OPERATION"],
+  [37442, "CONTEXT_LOST_WEBGL"],
+]);
 
 /**
  * @param {WebGL2RenderingContext} gl
  * @return {Error}
  */
 function glError(gl) {
-  // From GLenum. See also
-  // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getError
-  const GL_ERROR_MESSAGES = {
-    0: "NO_ERROR (Unreachable!)",
-    1280: "INVALID_ENUM",
-    1281: "INVALID_VALUE",
-    1282: "INVALID_OPERATION",
-    1285: "OUT_OF_MEMORY",
-    1286: "INVALID_FRAMEBUFFER_OPERATION",
-    37442: "CONTEXT_LOST_WEBGL",
-  };
   const error = gl.getError();
-  let message = GL_ERROR_MESSAGES[error];
-  if (!message) {
-    message = `Unknown WebGL error: ${error}`;
-  }
+  const message = GL_ERROR_MESSAGES.get(error) || "UNREACHABLE";
   return new Error(message);
 }
-
-main();
