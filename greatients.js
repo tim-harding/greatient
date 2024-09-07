@@ -49,10 +49,10 @@ function init(vertexSource, fragmentSource) {
     console.error("WebGL2 not available");
     return;
   }
+
   if (window.matchMedia("(color-gamut: p3)").matches) {
     gl.drawingBufferColorSpace = "display-p3";
   }
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
@@ -63,18 +63,29 @@ function init(vertexSource, fragmentSource) {
   const positionBuffer = gl.createBuffer();
   if (!positionBuffer) throw glError(gl);
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  const positions = [10, 20, 80, 20, 10, 30, 10, 30, 80, 20, 80, 30];
+  const positions = [
+    -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
+  ];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
   const vao = gl.createVertexArray();
   if (!vao) throw glError(gl);
-  gl.bindVertexArray(vao);
-  gl.enableVertexAttribArray(positionAttribute);
-  gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
-  gl.clearColor(0, 0, 0, 0);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.useProgram(program);
-  gl.uniform2f(resolutionUniform, gl.canvas.width, gl.canvas.height);
-  gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+  const resize = new ResizeObserver((entries) => {
+    const { inlineSize: width, blockSize: height } =
+      entries[0].devicePixelContentBoxSize[0];
+    canvas.width = width;
+    canvas.height = height;
+    gl.viewport(0, 0, width, height);
+    gl.clearColor(0, 0.2, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(program);
+    gl.bindVertexArray(vao);
+    gl.enableVertexAttribArray(positionAttribute);
+    gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(resolutionUniform, width, height);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  });
+  resize.observe(canvas, { box: "device-pixel-content-box" });
 }
 
 /**
