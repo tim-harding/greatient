@@ -42,6 +42,7 @@ export function Shared(canvas) {
  * @param {Shared} shared
  */
 export function resume(shared) {
+  if (shared.resize !== null) return;
   const { gl, canvas } = shared;
 
   /**
