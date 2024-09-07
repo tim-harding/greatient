@@ -1,7 +1,6 @@
 // TODO: Stop and resume gradient canvas
 
-import SHADER_VERTEX from "./vertex.js";
-import SHADER_FRAGMENT from "./fragment.js";
+import { SHADER_VERTEX, SHADER_FRAGMENT } from "./shader.js";
 
 export class Greatient {
   #boundingClientRect = { width: 0, height: 0 };
