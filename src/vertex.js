@@ -1,3 +1,4 @@
+const SHADER_VERTEX = `\
 #version 300 es
 
 in vec2 a_position;
@@ -9,3 +10,7 @@ void main() {
     // vec2 clipSpace = zeroToTwo - 1.0;
     gl_Position = vec4(a_position, 0, 1);
 }
+`;
+
+export default SHADER_VERTEX;
+// vim: set filetype=glsl:

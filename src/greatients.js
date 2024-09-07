@@ -1,27 +1,7 @@
 // TODO: Stop and resume gradient canvas
 
-const VERTEX_SOURCE = `\
-#version 300 es
-
-in vec2 a_position;
-// uniform vec2 u_resolution;
-
-void main() {
-    gl_Position = vec4(a_position, 0, 1);
-}
-`;
-
-const FRAGMENT_SOURCE = `\
-#version 300 es
-
-precision highp float;
-
-out vec4 outColor;
-
-void main() {
-    outColor = vec4(1, 0, 0.5, 1);
-}
-`;
+import SHADER_VERTEX from "./vertex.js";
+import SHADER_FRAGMENT from "./fragment.js";
 
 export class Greatient {
   #boundingClientRect = { width: 0, height: 0 };
@@ -59,11 +39,11 @@ export class Greatient {
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
 
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SOURCE);
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, SHADER_VERTEX);
     const fragmentShader = createShader(
       gl,
       gl.FRAGMENT_SHADER,
-      FRAGMENT_SOURCE,
+      SHADER_FRAGMENT,
     );
 
     const program = createProgram(gl, vertexShader, fragmentShader);
