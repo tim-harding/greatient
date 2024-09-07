@@ -112,6 +112,23 @@ export class Greatient {
   }
 
   /**
+   * @param { "bezier" | "catmull-rom" | "bspline" } mode
+   */
+  setInterpolation(mode) {}
+
+  /**
+   * This callback is called to modify the bezier points of a {@link Greatient}.
+   * @callback updateBezierPointsCallback
+   * @param {Float32Array} points
+   */
+
+  /**
+   * Update the set of
+   * @param {updateBezierPointsCallback} callback
+   */
+  updateBezierPoints(callback) {}
+
+  /**
    * Repaint the canvas. When manually driving gradient animations, this should
    * be called in a `requestAnimationFrame` callback.
    */
