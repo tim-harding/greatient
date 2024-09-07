@@ -1,4 +1,9 @@
-import { createBuffer, createProgramFromSources, createVao } from "../webgl";
+import {
+  createBuffer,
+  createProgramFromSources,
+  createVao,
+  getUniform,
+} from "../webgl";
 import { FRAGMENT_SOURCE, VERTEX_SOURCE } from "./shader";
 
 /** Offset from anchor point index for the north handle */
@@ -11,12 +16,28 @@ const S = 6;
 const W = 8;
 
 /**
+ * State needed to render bezier gradients that can be shared across gradients
+ * @typedef {Object} BezierShared
+ * @property {WebGLProgram} program
+ * @property {GLint} attributeUv
+ * @property {WebGLUniformLocation} uniformPx
+ * @property {WebGLUniformLocation} uniformPy
+ */
+
+/**
+ * @typedef {Object} Bezier
+ * @property {BezierShared} shared
+ * @property {WebGLBuffer} vbo
+ * @property {WebGLVertexArrayObject} vao
+ */
+
+/**
  * Generates each array element of an instance mesh, which consists of the (u,v)
  * coordinates from (0,0) through (1,1).
  * @param {number} subdivisions Number of edges to insert between control points
  * @yields {number}
  */
-function* instanceMeshElements(subdivisions) {
+function* uvMeshElements(subdivisions) {
   const dim = subdivisions + 2;
   for (let y = 0; y < dim + 1; y++) {
     for (let x = 0; x < dim + 1; x++) {
@@ -27,24 +48,42 @@ function* instanceMeshElements(subdivisions) {
 }
 
 /**
+ * Create per-gradient bezier rendering state
  * @param {WebGL2RenderingContext} gl
+ * @param {BezierShared} shared
  * @param {number} subdivisions Number of edges to insert between control points
+ * @return {Bezier}
  */
-export function instanceMesh(gl, subdivisions) {
-  const mesh = new Float32Array(instanceMeshElements(subdivisions));
+export function Bezier(gl, shared, subdivisions) {
+  const mesh = new Float32Array(uvMeshElements(subdivisions));
   const vbo = createBuffer(gl);
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
   gl.bufferData(gl.ARRAY_BUFFER, mesh, gl.STATIC_DRAW);
 
   const vao = createVao(gl);
   gl.bindVertexArray(vao);
+  gl.enableVertexAttribArray(shared.attributeUv);
+  gl.vertexAttribPointer(shared.attributeUv, 1, gl.FLOAT_VEC2, false, 0, 0);
+
+  return { shared, vbo, vao };
 }
 
 /**
+ * Create the shared bezier rendering state.
  * @param {WebGL2RenderingContext} gl
+ * @return {BezierShared}
  */
-export function program(gl) {
-  return createProgramFromSources(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
+export function BezierShared(gl) {
+  const program = createProgramFromSources(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
+  const attributeUv = gl.getAttribLocation(program, "uv");
+  const uniformPx = getUniform(gl, program, "Px");
+  const uniformPy = getUniform(gl, program, "Py");
+  return {
+    program,
+    attributeUv,
+    uniformPx,
+    uniformPy,
+  };
 }
 
 /**

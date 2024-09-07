@@ -78,6 +78,19 @@ export function createVao(gl) {
   return vao;
 }
 
+/**
+ * Get the location of a WebGL uniform
+ * @param {WebGL2RenderingContext} gl
+ * @param {WebGLProgram} program
+ * @param {string} name
+ * @return {WebGLUniformLocation}
+ */
+export function getUniform(gl, program, name) {
+  const location = gl.getUniformLocation(program, name);
+  if (!location) throw glError(gl);
+  return location;
+}
+
 // From GLenum. See also
 // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getError
 const GL_ERROR_MESSAGES = new Map([

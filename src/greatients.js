@@ -1,4 +1,9 @@
-// TODO: Stop and resume gradient canvas
+// TODO:
+//
+// Stop and resume gradient canvas
+//
+// Allow multiple elements to use the same canvas context:
+// https://webglfundamentals.org/webgl/lessons/webgl-multiple-views.html
 
 import { SHADER_VERTEX, SHADER_FRAGMENT } from "./shader.js";
 import { createShader, createProgram, glError } from "./webgl.js";
