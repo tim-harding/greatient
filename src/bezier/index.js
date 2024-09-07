@@ -39,10 +39,11 @@ const W = 8;
  */
 function* uvMeshElements(subdivisions) {
   const dim = subdivisions + 2;
-  for (let y = 0; y < dim + 1; y++) {
-    for (let x = 0; x < dim + 1; x++) {
-      yield x / dim;
-      yield y / dim;
+  const scalar = 1 / (dim - 1);
+  for (let y = 0; y < dim; y++) {
+    for (let x = 0; x < dim; x++) {
+      yield x * scalar;
+      yield y * scalar;
     }
   }
 }

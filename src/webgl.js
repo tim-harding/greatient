@@ -91,8 +91,10 @@ export function getUniform(gl, program, name) {
   return location;
 }
 
-// From GLenum. See also
-// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getError
+/**
+ * From GLenum. See also
+ * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getError
+ */
 const GL_ERROR_MESSAGES = new Map([
   [0, "NO_ERROR"],
   [1280, "INVALID_ENUM"],
