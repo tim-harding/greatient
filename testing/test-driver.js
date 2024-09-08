@@ -1,4 +1,4 @@
-import { Greatient } from "../src/greatients.js";
+import { Greatient } from "../src/greatient.js";
 
 function main() {
   const canvas = document.getElementById("gradient");

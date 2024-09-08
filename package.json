@@ -1,15 +1,25 @@
 {
-  "name": "greatients",
-  "version": "1.0.0",
-  "description": "## Todo",
-  "main": "greatients.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "greatient",
+  "version": "0.1.0",
+  "description": "Mesh gradient rendering library",
+  "author": "Tim Harding",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tim-harding/greatient"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "sideEffects": [
-    "./test-driver.js"
-  ]
+  "imports": {
+    "greatient": "/src/greatient.js",
+    "greatient/": "/src/"
+  },
+  "scripts": {
+    "serve": "live-server"
+  },
+  "keywords": [
+    "mesh",
+    "gradient",
+    "canvas",
+    "webgl"
+  ],
+  "sideEffects": false
 }
