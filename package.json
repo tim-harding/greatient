@@ -8,6 +8,7 @@
     "type": "git",
     "url": "https://github.com/tim-harding/greatient"
   },
+  "module": "/src/greatient.mjs",
   "imports": {
     "greatient": "/src/greatient.js",
     "greatient/": "/src/"
